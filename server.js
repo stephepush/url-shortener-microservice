@@ -25,7 +25,11 @@ app.get('/api/hello', function(req, res) {
 
 app.post('/api/shorturl/', function(req, res){
   console.log(req.body)
-  dns.lookup('apple.com', (err, address, family)=>{
+  let url = req.body.url
+  url_without_protocol = url.replace(/^https?:\/\//, '')
+  //above line source: https://stackoverflow.com/a/8206279/5456075
+  console.log(url_without_protocol)
+  dns.lookup(url_without_protocol, (err, address, family)=>{
     console.log(`address: ${address} family: IPv${family}`)
   })
   res.end()
