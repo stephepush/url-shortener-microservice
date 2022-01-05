@@ -3,6 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const dns = require('dns');
+const {body, validationResult} = require('express-validator')
+const {urlArray} = require('./urlArray.js');
+const { response } = require('express');
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
@@ -23,16 +26,28 @@ app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
 });
 
-app.post('/api/shorturl/', function(req, res){
-  console.log(req.body)
-  let url = req.body.url
-  url_without_protocol = url.replace(/^https?:\/\//, '')
-  //above line source: https://stackoverflow.com/a/8206279/5456075
-  console.log(url_without_protocol)
-  dns.lookup(url_without_protocol, (err, address, family)=>{
-    console.log(`address: ${address} family: IPv${family}`)
-  })
-  res.end()
+app.post('/api/shorturl/', body('url').isURL(), 
+  
+  (req, res) => {
+    const errors = validationResult(req);
+    if(errors.isEmpty()){
+      console.log(req.body)
+      let url = req.body.url
+      
+      url_without_protocol = url.replace(/^https?:\/\//, '')
+      //above line source: https://stackoverflow.com/a/8206279/5456075
+      console.log(url_without_protocol)
+      console.log(urlArray)
+      dns.lookup(url_without_protocol, (err, address, family)=>{
+        console.log(`address: ${address} family: IPv${family}`)
+        
+      })
+      urlArray.push({original_url: `${req.body.url}`, short_url: urlArray.length + 1})
+      res.end()
+    } else {
+      res.send({error: 'invalid url'})
+    }
+
 })
 
 app.get('/api/shorturl/:id', function(req,res){
