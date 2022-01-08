@@ -4,8 +4,9 @@ const cors = require('cors');
 const app = express();
 const dns = require('dns');
 const {body, validationResult} = require('express-validator')
-const {urlArray} = require('./urlArray.js');
+//const {urlArray} = require('./urlArray.js');
 const { response } = require('express');
+const ShortenedLink = require('./models/shortenedLink.js');
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
@@ -31,19 +32,19 @@ app.post('/api/shorturl/', body('url').isURL(),
   (req, res) => {
     const errors = validationResult(req);
     if(errors.isEmpty()){
-      console.log(req.body)
+      //console.log(req.body)
       let url = req.body.url
       
-      url_without_protocol = url.replace(/^https?:\/\//, '')
+      const url_without_protocol = url.replace(/^https?:\/\//, '')
       //above line source: https://stackoverflow.com/a/8206279/5456075
       console.log(url_without_protocol)
-      console.log(urlArray)
       dns.lookup(url_without_protocol, (err, address, family)=>{
         console.log(`address: ${address} family: IPv${family}`)
         
       })
-      urlArray.push({original_url: `${req.body.url}`, short_url: urlArray.length + 1})
-      res.end()
+      const shortenedLink = new ShortenedLink(req.body.url, url_without_protocol)
+      shortenedLink.save()
+      res.redirect(url)
     } else {
       res.send({error: 'invalid url'})
     }
