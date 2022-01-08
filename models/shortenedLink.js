@@ -1,6 +1,23 @@
 const fs = require('fs');
 const path = require('path');
 
+const p = path.join(
+    path.dirname(require.main.filename),
+    'data',
+    'shortenedLinks.json'
+);
+
+const arrayFetchHelper = cb => {
+
+    fs.readFile(p, (err, fileContent) => {
+            if (err) {
+                cb([]);
+            } else {
+                cb(JSON.parse(fileContent))
+            }
+        })
+        //return links
+}
 
 module.exports = class ShortenedLink {
 
@@ -34,17 +51,6 @@ module.exports = class ShortenedLink {
     }
 
     static fetchAll(cb) {
-        const p = path.join(
-            path.dirname(require.main.filename),
-            'data',
-            'shortenedLinks.json'
-        );
-        fs.readFile(p, (err, fileContent) => {
-            if (err) {
-                cb([]);
-            }
-            cb(JSON.parse(fileContent))
-        })
-
+        arrayFetchHelper(cb)
     }
 }
